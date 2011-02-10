@@ -1,0 +1,126 @@
+#!/usr/bin/env ruby
+
+help = <<-MSG
+Usage: gorgeous [-i] [-F <in-format>] [-T <out-format>] [-q <query>] [-o <destination>] FILE ...
+
+This utility converts data between different formats.
+Formats are one of:  json, xml, yaml, ruby, email, url
+
+Input can be read from STDIN as well as files given on the command-line.
+
+Options:
+  -i    Convert file in-place
+  -F    Input format
+  -T    Output format
+  -q    Query selector in format similar to XPath (see below)
+  -o    Write output to file instead of STDOUT
+
+Query format:
+  "/items/comments[1]/text"    --  2nd comment body of each item
+  "/items[-1]/user/full_name"  --  name of user for last item
+  "//user/username"            --  usernames of all users anywhere in the document
+
+MSG
+
+if ARGV.index('-h') or ARGV.index('--help')
+  puts help
+  exit
+end
+
+require 'gorgeous'
+
+help_usage = help.split("\n", 2).first
+
+options = help_usage.scan(/[^\w-](-[a-z])(?: <(.+?)>)?/i).inject({}) do |opts, (flag, value)|
+  if value.nil?
+    opts[flag] = true if ARGV.delete flag
+  elsif idx = ARGV.index(flag)
+    opts[flag] = ARGV[idx + 1]
+    2.times { ARGV.delete_at idx }
+  end
+  opts
+end
+
+in_place = options['-i']
+query_path = options['-q']
+input_format = options['-F'] && options['-F'].to_sym
+output_format ||= options['-T'] && options['-T'].to_sym
+destination = options['-o']
+from_stdin = !$stdin.tty?
+
+if from_stdin
+  if in_place
+    warn "can't edit stdin in place"
+    exit 1
+  end
+elsif in_place and destination
+  warn "can't combine -i and -o flags"
+  exit 1
+elsif ARGV.empty?
+  warn help_usage
+  exit 1
+end
+
+# clobber the input file
+destination = ARGV.first if in_place
+
+input = Gorgeous.new(ARGF, :filename => ARGV.first, :format => input_format, :query => query_path)
+
+unless input.format
+  warn "unrecognized input format; specify explicit format with `-F <format>`"
+  exit 1
+end
+
+output_format ||= if destination
+  Gorgeous.filename_to_format(destination)
+else
+  input.format
+end
+
+if output_format == :ruby
+  require 'pp'
+  output = input.data.pretty_inspect
+elsif output_format == :json
+  require 'yajl/json_gem'
+  output = JSON.pretty_generate input.data
+elsif output_format == :yaml
+  require 'yaml'
+  output = YAML.dump input.data
+elsif input_format == :email and output_format == :xml
+  require 'nokogiri'
+  email = input.to_mail
+  part = email.html_part
+  html = Gorgeous.convert_utf8(part.decode_body, part.charset)
+  ugly = Nokogiri::HTML html
+  output = Gorgeous.pretty_xml(ugly)
+elsif input_format == :email and output_format == :txt and not input.filtered?
+  email = input.to_mail
+  part = email.text_part
+  output = Gorgeous.convert_utf8(part.decode_body.strip, part.charset)
+elsif output_format == :xml
+  output = Gorgeous.pretty_xml(input.to_xml)
+elsif output_format == :url
+  require 'rack/utils'
+  output = Rack::Utils.build_nested_query(input.data)
+elsif output_format == :txt
+  data = input.data
+  output = Array === data ? data.join("\n") : data.to_s
+else
+  warn "don't know how to convert #{input_format} to #{output_format}"
+  exit 1
+end
+
+if destination
+  begin
+    File.open(destination, 'w') { |f| f << output }
+  rescue Errno::ENOENT
+    warn "error opening #{destination} for writing"
+    exit 1
+  end
+else
+  begin
+    puts output
+  rescue Errno::EPIPE
+    # ignore "broken pipe" exception
+  end
+end
