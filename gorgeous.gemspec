@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name    = 'gorgeous'
-  gem.version = '0.1.0'
+  gem.version = '0.1.1'
   gem.date    = Time.now.strftime('%Y-%m-%d')
 
   # gem.add_dependency 'hpricot', '~> 0.8.2'
