@@ -38,7 +38,12 @@ class Gorgeous
       end
     }
     header_value = lambda { |name|
-      field = email.header[name] and field.value.to_s
+      field = email.header[name]
+      if Array === field
+        field.map { |f| f.value.to_s }
+      elsif field
+        field.value.to_s
+      end
     }
     decoded_value = lambda { |name|
       field = email.header[name]
