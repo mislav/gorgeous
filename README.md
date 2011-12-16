@@ -29,8 +29,8 @@ Query format:
 
 It's recommended that you install all of these ruby libraries. They are only loaded when processing specific formats.
 
-* **nokogiri** for xml
-* **yajl-ruby** for json
+* **nokogiri** for HTML/XML
+* **yajl-ruby** or **json** for JSON (for Ruby < 1.9)
 * **activesupport** (for various stuff)
 * **rack** for url
 * **mail** for email
