@@ -81,7 +81,11 @@ if output_format == :ruby
   require 'pp'
   output = input.data.pretty_inspect
 elsif output_format == :json
-  require 'yajl/json_gem'
+  begin
+    require 'yajl/json_gem'
+  rescue LoadError
+    require 'json'
+  end
   output = JSON.pretty_generate input.data
 elsif output_format == :yaml
   require 'yaml'

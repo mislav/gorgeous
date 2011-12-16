@@ -125,7 +125,11 @@ class Gorgeous
       require 'active_support/core_ext/hash/conversions'
       Hash.from_xml(to_s)
     when :json
-      require 'yajl/json_gem'
+      begin
+        require 'yajl/json_gem'
+      rescue LoadError
+        require 'json'
+      end
       JSON.parse to_s
     when :yaml
       require 'yaml'
