@@ -99,7 +99,7 @@ elsif input_format == :email and output_format == :xml
   output = Gorgeous.pretty_xml(ugly)
 elsif input_format == :email and output_format == :txt and not input.filtered?
   email = input.to_mail
-  part = email.text_part
+  part = email.text?? email : email.text_part
   output = Gorgeous.convert_utf8(part.decode_body.strip, part.charset)
 elsif output_format == :xml
   output = Gorgeous.pretty_xml(input.to_xml)
