@@ -4,8 +4,10 @@ Gem::Specification.new do |gem|
   gem.name    = 'gorgeous'
   gem.version = '0.1.2'
 
-  # gem.add_dependency 'hpricot', '~> 0.8.2'
-  # gem.add_development_dependency 'rspec', '~> 1.2.9'
+  gem.add_dependency 'nokogiri'
+  gem.add_dependency 'activesupport'
+  gem.add_dependency 'rack'
+  gem.add_dependency 'mail'
 
   gem.summary = "Convert between different data formats; prettify JSON, HTML and XML"
   # gem.description = "Longer description."
