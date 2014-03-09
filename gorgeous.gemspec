@@ -10,13 +10,10 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'mail'
 
   gem.summary = "Convert between different data formats; prettify JSON, HTML and XML"
-  # gem.description = "Longer description."
 
   gem.authors  = ['Mislav Marohnić']
   gem.email    = 'mislav.marohnic@gmail.com'
-  gem.homepage = 'https://github.com/mislav/gorgeous'
-
-  gem.rubyforge_project = nil
+  gem.homepage = 'https://github.com/mislav/gorgeous#readme'
 
   gem.executables = %w( gorgeous )
   gem.files = Dir['Rakefile', '{bin,lib,man,test,spec}/**/*', 'README*', 'LICENSE*'] & `git ls-files -z`.split("\0")
