@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name    = 'gorgeous'
-  gem.version = '0.1.2'
+  gem.version = '0.2.0'
 
   gem.add_dependency 'nokogiri'
   gem.add_dependency 'activesupport'
